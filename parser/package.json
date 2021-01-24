@@ -1,0 +1,20 @@
+{
+  "name": "node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "iconv": "^3.0.0",
+    "jsdom": "^16.4.0",
+    "line-reader": "^0.4.0",
+    "needle": "^2.6.0",
+    "pg": "^8.5.1",
+    "utf8": "^3.0.0"
+  }
+}
