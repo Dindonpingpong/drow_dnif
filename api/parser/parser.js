@@ -1,20 +1,15 @@
-const { Client } = require('pg');
-
-const client = new Client({
-    user: 'super',
-    host: 'localhost',
-    database: 'dnif',
-    password: '1234',
-    port: 5432,
-})
+const client = require('../../api/db/psql');
 
 const parser = async (word) => {
-    const wordList = word.split("");
-    const len = wordList.length;
+    let result = new Object();
+    result['word'] = word;
+    result['solutions'] = [];
+    const allChars = word.split("");
+    const len = allChars.length;
 
-    for (i = 3; i < Math.floor(len / 2) + 1; i++) {
-        for (j = 0; j + i < len; j++) {
-            let tmp = wordList.slice();
+    for (let i = 3; i < Math.floor(len / 2) + 1; i++) {
+        for (let j = 0; j + i < len; j++) {
+            let tmp = allChars.slice();
             const firstListChars = tmp.splice(j, i).sort();
             const secondListChars = tmp.sort();
             let firstMask = new Set(firstListChars);
@@ -22,30 +17,20 @@ const parser = async (word) => {
             firstMask = `^[${[...firstMask].join(',')}]{${i}}$`;
             secondMask = `^[${[...secondMask].join(',')}]{${len - i}}$`;
 
-            const result = await findWordsByMask(firstMask, secondMask, firstListChars, secondListChars);
+            const res = await findWordsByMask(firstMask, secondMask, firstListChars, secondListChars);
 
-            if (result !== null) {
-                console.log(result);
+            if (res !== null) {
+                result['solutions'].push(res);
             }
         }
     }
 
+    return result;
 }
 
-const main = async (listOfWords) => {
-    await client.connect();
-
-    listOfWords.map((word) => {
-        if (word.length < 6)
-            console.log("Can't make it")
-        else
-            parser(word);
-    })
-}
 
 const findWordsByMask = async (firstMask, secondMask, firstListChars, secondListChars) => {
     try {
-
         const query = (mask) => {
             return client.query(`SELECT REGEXP_MATCHES(NOUN, $1) FROM Words`, [mask]);
         }
@@ -65,7 +50,8 @@ const findWordsByMask = async (firstMask, secondMask, firstListChars, secondList
 
         const pretty = (filtered, listOfChars) => {
             let result = new Object();
-            result[`Combinations from (${listOfChars.join(",")}) letters`] = filtered;
+            result['letters'] = `(${listOfChars.join(',')})`;
+            result['words'] = filtered;
 
             return result;
         }
@@ -82,12 +68,28 @@ const findWordsByMask = async (firstMask, secondMask, firstListChars, secondList
         if (filteredFirst === null || filteredSecond === null)
             return null;
 
-        return [pretty(filteredFirst, firstListChars), pretty(filteredSecond, secondListChars)];
+        let final = new Object();
+        final['firstWord'] = pretty(filteredFirst, firstListChars);
+        final['secondWord'] = pretty(filteredSecond, secondListChars);
+
+        return final;
     } catch (e) {
-        console.log(e.message);
+        console.log(e.message)
         return null;
     }
 }
 
+exports.findWords = async (listOfWords) => {
+    try {
+        const result = await Promise.all(
+            listOfWords.map((word) => {
+                return (word.length < 6) ? console.log("Can't make it") : parser(word);
+            }))
 
-main(['суррогат']);
+        return result;
+    } catch (e) {
+        console.log(e.message);
+        return null;
+    }
+
+}
