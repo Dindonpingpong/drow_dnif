@@ -1,11 +1,10 @@
 const client = require('../../api/db/psql');
 
 const parser = async (word) => {
-    let result = new Object();
-    result['word'] = word;
-    result['solutions'] = [];
     const allChars = word.split("");
     const len = allChars.length;
+    let result = [];
+    let solutionCounter = 1;
 
     for (let i = 3; i < Math.floor(len / 2) + 1; i++) {
         for (let j = 0; j + i < len; j++) {
@@ -20,7 +19,12 @@ const parser = async (word) => {
             const res = await findWordsByMask(firstMask, secondMask, firstListChars, secondListChars);
 
             if (res !== null) {
-                result['solutions'].push(res);
+                let tmp = new Object();
+                tmp['inputWord'] = word;
+                tmp['solution'] = solutionCounter++;
+                tmp['firstWord'] = res['firstWord'].words;
+                tmp['secondWord'] = res['secondWord'].words;
+                result.push(tmp);
             }
         }
     }
@@ -48,10 +52,9 @@ const findWordsByMask = async (firstMask, secondMask, firstListChars, secondList
             return (filtered.length > 0) ? filtered : null;
         }
 
-        const pretty = (filtered, listOfChars) => {
+        const pretty = (filtered) => {
             let result = new Object();
-            result['letters'] = `(${listOfChars.join(',')})`;
-            result['words'] = filtered;
+            result['words'] = filtered.join(', ');
 
             return result;
         }
@@ -69,8 +72,8 @@ const findWordsByMask = async (firstMask, secondMask, firstListChars, secondList
             return null;
 
         let final = new Object();
-        final['firstWord'] = pretty(filteredFirst, firstListChars);
-        final['secondWord'] = pretty(filteredSecond, secondListChars);
+        final['firstWord'] = pretty(filteredFirst);
+        final['secondWord'] = pretty(filteredSecond);
 
         return final;
     } catch (e) {
@@ -81,10 +84,7 @@ const findWordsByMask = async (firstMask, secondMask, firstListChars, secondList
 
 exports.findWords = async (listOfWords) => {
     try {
-        const result = await Promise.all(
-            listOfWords.map((word) => {
-                return (word.length < 6) ? console.log("Can't make it") : parser(word);
-            }))
+        const result = await Promise.all(listOfWords.map((word) => (word.length < 6) ? null : parser(word)));
 
         return result;
     } catch (e) {

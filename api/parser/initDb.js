@@ -9,25 +9,26 @@ const client = new Client({
   port: 5432,
 })
 
-const main = async () => {
-  try {
+const main = () => {
+  const fs = require('fs');
 
-    await client.connect();
+  await client.connect();
 
-    await lineReader.eachLine('russian_nouns.txt', async (line) => {
-      try {
+  const data = fs.readFileSync('words.txt', 'UTF-8');
 
-        const res = await client.query('INSERT INTO Words (noun) VALUES ($1) RETURNING id', [line]);
-        console.log(res.rows[0], line);
-      } catch (e) {
-        console.log(e.message)
-      }
-    });
+  const lines = data.split(/\r?\n/);
 
+  lines.forEach(async (line) => {
+    try {
+      const res = await client.query('INSERT INTO Words (noun) VALUES ($1) RETURNING id', [line]);
+      console.log(res.rows[0], line);
+    } catch (e) {
+      console.log(e.message)
+      process.exit();
+    }
+  });
 
-  } catch (e) {
-    console.log(e.message);
-  }
+  process.exit();
 }
 
 main();
