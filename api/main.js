@@ -18,15 +18,11 @@ const csvStringifier = createCsvStringifier({
 
 const main = async () => {
     try {
-        let words = [];
         const data = fs.readFileSync('words.txt', 'UTF-8');
-        const lines = data.split(/\r?\n/);
-
-        lines.forEach((line) => words.push(line));
+        const words = data.split(/\r?\n/);
 
         const res = await findWords(words);
         const final = [].concat.apply([], res);
-
 
         const headerLine = csvStringifier.getHeaderString();
         const recordLines = csvStringifier.stringifyRecords(final);
