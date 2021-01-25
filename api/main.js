@@ -1,9 +1,13 @@
 const { findWords } = require('./parser/parser');
-const createCsvWriter = require('csv-writer').createObjectCsvWriter
+const createCsvStringifier = require('csv-writer').createObjectCsvStringifier
 const fs = require('fs');
+const iconv = require('iconv-lite');
 
-const csvWriter = createCsvWriter({
+const toWin = text => iconv.encode(text, "win1251");
+
+const csvStringifier = createCsvStringifier({
     path: 'result.csv',
+    encoding: 'unicode',
     header: [
         { id: 'inputWord', title: 'Origin' },
         { id: 'solution', title: 'Solution' },
@@ -23,12 +27,11 @@ const main = async () => {
         const res = await findWords(words);
         const final = [].concat.apply([], res);
 
-        await csvWriter.writeRecords(final)
-            .then(() => {
-                console.log('...Done');
-            });
 
-        
+        const headerLine = csvStringifier.getHeaderString();
+        const recordLines = csvStringifier.stringifyRecords(final);
+
+        fs.writeFileSync("result.csv", toWin(headerLine + recordLines));
         process.exit();
     } catch (err) {
         console.error(err);
