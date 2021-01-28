@@ -1,33 +1,67 @@
 const client = require('../../api/db/psql');
 
+const swap = (ar, i, j) => { let a = ar[i]; ar[i] = ar[j]; ar[j] = a; }
+
+const permNxt = (ar, lf) => {
+    let rt = ar.length - 1,
+        i = rt - 1;
+    while (i >= lf && ar[i] >= ar[i + 1]) i--;
+    if (i < lf)
+        return false;
+
+    let j = rt;
+    while (ar[i] >= ar[j]) j--;
+    swap(ar, i, j);
+
+    lf = i + 1;
+    while (lf < rt)
+        swap(ar, lf++, rt--);
+
+    return true;
+}
+
+
 const parser = async (word) => {
-    const allChars = word.split("");
-    const len = allChars.length;
+    let allChars = word.split("");
     let result = [];
     let solutionCounter = 1;
+    let maskMap = new Map();
+    const len = allChars.length;
+    
+    do{
+        for (let i = 2; i < Math.floor(len / 2) + 1; i++) {
+            console.log('here', i);
+            for (let j = 0; j + i < len + 1; j++) {
+                let tmp = allChars.slice();
+                const firstListChars = tmp.splice(j, i).sort();
+                const secondListChars = tmp.sort();
 
-    for (let i = 3; i < Math.floor(len / 2) + 1; i++) {
-        for (let j = 0; j + i < len; j++) {
-            let tmp = allChars.slice();
-            const firstListChars = tmp.splice(j, i).sort();
-            const secondListChars = tmp.sort();
-            let firstMask = new Set(firstListChars);
-            let secondMask = new Set(secondListChars);
-            firstMask = `^[${[...firstMask].join(',')}]{${i}}$`;
-            secondMask = `^[${[...secondMask].join(',')}]{${len - i}}$`;
+                const key = firstListChars.toString();
+                if (maskMap.has(key))
+                    continue;
+                
+                maskMap.set(key, 1);
 
-            const res = await findWordsByMask(firstMask, secondMask, firstListChars, secondListChars);
+                let firstMask = new Set(firstListChars);
+                let secondMask = new Set(secondListChars);
 
-            if (res !== null) {
-                let tmp = new Object();
-                tmp['inputWord'] = word;
-                tmp['solution'] = solutionCounter++;
-                tmp['firstWord'] = res['firstWord'].words;
-                tmp['secondWord'] = res['secondWord'].words;
-                result.push(tmp);
+                firstMask = `^[${[...firstMask].join(',')}]{${i}}$`;
+                secondMask = `^[${[...secondMask].join(',')}]{${len - i}}$`;
+    
+                const res = await findWordsByMask(firstMask, secondMask, firstListChars, secondListChars);
+    
+                if (res !== null) {
+                    let tmp = new Object();
+                    tmp['inputWord'] = word;
+                    tmp['solution'] = solutionCounter++;
+                    tmp['firstWord'] = res['firstWord'].words;
+                    tmp['secondWord'] = res['secondWord'].words;
+                    result.push(tmp);
+                }
             }
         }
     }
+    while(permNxt(allChars, 0));
 
     return result;
 }
