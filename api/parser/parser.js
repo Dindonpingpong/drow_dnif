@@ -27,10 +27,9 @@ const parser = async (word) => {
     let solutionCounter = 1;
     let maskMap = new Map();
     const len = allChars.length;
-    
-    do{
+
+    do {
         for (let i = 2; i < Math.floor(len / 2) + 1; i++) {
-            console.log('here', i);
             for (let j = 0; j + i < len + 1; j++) {
                 let tmp = allChars.slice();
                 const firstListChars = tmp.splice(j, i).sort();
@@ -39,7 +38,7 @@ const parser = async (word) => {
                 const key = firstListChars.toString();
                 if (maskMap.has(key))
                     continue;
-                
+
                 maskMap.set(key, 1);
 
                 let firstMask = new Set(firstListChars);
@@ -47,9 +46,9 @@ const parser = async (word) => {
 
                 firstMask = `^[${[...firstMask].join(',')}]{${i}}$`;
                 secondMask = `^[${[...secondMask].join(',')}]{${len - i}}$`;
-    
+
                 const res = await findWordsByMask(firstMask, secondMask, firstListChars, secondListChars);
-    
+
                 if (res !== null) {
                     let tmp = new Object();
                     tmp['inputWord'] = word;
@@ -61,7 +60,7 @@ const parser = async (word) => {
             }
         }
     }
-    while(permNxt(allChars, 0));
+    while (permNxt(allChars, 0));
 
     return result;
 }
@@ -118,7 +117,7 @@ const findWordsByMask = async (firstMask, secondMask, firstListChars, secondList
 
 exports.findWords = async (listOfWords) => {
     try {
-        const result = await Promise.all(listOfWords.map((word) => (word.length < 6) ? null : parser(word)));
+        const result = await Promise.all(listOfWords.filter((word) => word.length > 6).map((word) => parser(word)));
 
         return result;
     } catch (e) {
