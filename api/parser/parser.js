@@ -117,7 +117,9 @@ const findWordsByMask = async (firstMask, secondMask, firstListChars, secondList
 
 exports.findWords = async (listOfWords) => {
     try {
-        const result = await Promise.all(listOfWords.filter((word) => word.length > 6).map((word) => parser(word)));
+        const result = await Promise.all(listOfWords
+            .filter((word) => (word.length > 6 && word.match(/[A-z0-9]/g) === null))
+            .map((word) => parser(word.toLowerCase())));
 
         return result;
     } catch (e) {

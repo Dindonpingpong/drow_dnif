@@ -18,7 +18,7 @@ const csvStringifier = createCsvStringifier({
 
 const main = async () => {
     try {
-        const data = fs.readFileSync('words.txt', 'UTF-8');
+        const data = fs.readFileSync('./../words.txt', 'UTF-8');
         const words = data.split(/\r?\n/);
 
         const res = await findWords(words);
@@ -27,7 +27,7 @@ const main = async () => {
         const headerLine = csvStringifier.getHeaderString();
         const recordLines = csvStringifier.stringifyRecords(final);
 
-        fs.writeFileSync("result.csv", toWin(headerLine + recordLines));
+        fs.writeFileSync("./../result.csv", toWin(headerLine + recordLines));
         process.exit();
     } catch (err) {
         console.error(err);
