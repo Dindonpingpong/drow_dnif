@@ -9,7 +9,7 @@ const client = new Client({
   port: 5432,
 })
 
-const main = () => {
+const main = async () => {
   const fs = require('fs');
 
   await client.connect();
