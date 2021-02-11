@@ -14,7 +14,7 @@ const main = async () => {
 
   await client.connect();
 
-  const data = fs.readFileSync('words.txt', 'UTF-8');
+  const data = fs.readFileSync('russian_nouns.txt', 'UTF-8');
 
   const lines = data.split(/\r?\n/);
 
