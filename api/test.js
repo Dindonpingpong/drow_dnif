@@ -1,3 +1,4 @@
+const _ = require('lodash');
 
 const getAllSubsets =
     theArray => theArray.reduce(
@@ -8,24 +9,13 @@ const getAllSubsets =
     ).filter(item => item.length > 2);
 
 
-const test = "флорист".split("");
+const test = "магистерство".split("");
 const all = getAllSubsets(test)
+let t1 = _.uniq(all)
+let st = new Set(all)
 
-const fs = require('fs');
 
-const getWords = () => {
-    const data = fs.readFileSync('./parser/russian_nouns.txt', 'UTF-8');
-    return data.split(/\r?\n/);
-}
+let set = new Set(all.map(JSON.stringify));
+let arr2 = Array.from(set).map(JSON.parse);
 
-const NOUNS = getWords();
-
-const re = new RegExp('^[флот]{4}$');
-
-const filtered = NOUNS.filter((item) => {
-
-    if (re.test(item)) {
-        console.log(item);
-        return item;
-    }
-});
+console.log(arr2.length, all.length);
