@@ -33,7 +33,7 @@ const main = async () => {
         console.log(`The script uses approximately ${Math.round(used * 100) / 100} MB`);
 
         let end = performance.now();
-        console.log('It took ' + (end - start) + ' ms.');
+        console.log('It took ' + Math.round((end - start) / 6000) + ' minutes');
         process.exit();
     } catch (err) {
         console.error(err);

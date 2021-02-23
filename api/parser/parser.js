@@ -70,7 +70,7 @@ const parser = async (word) => {
         }
         const used = process.memoryUsage().heapUsed / 1024 / 1024;
         let end = performance.now();
-        process.stdout.write(`\rVar ${word} ${firstListChars} | ${secondListChars} | ${n++} ${Math.round(used * 100) / 100} MB | ${end - start} ms`);
+        process.stdout.write(`\rVar ${word} ${firstListChars} | ${secondListChars} | ${n++} ${Math.round(used * 100) / 100} MB | ${Math.round(end - start)} ms`);
     }
 
     return result;
