@@ -7,4 +7,25 @@ const getAllSubsets =
         [[]]
     ).filter(item => item.length > 2);
 
-console.log(getAllSubsets("123456789".split("")));
+
+const test = "флорист".split("");
+const all = getAllSubsets(test)
+
+const fs = require('fs');
+
+const getWords = () => {
+    const data = fs.readFileSync('./parser/russian_nouns.txt', 'UTF-8');
+    return data.split(/\r?\n/);
+}
+
+const NOUNS = getWords();
+
+const re = new RegExp('^[флот]{4}$');
+
+const filtered = NOUNS.filter((item) => {
+
+    if (re.test(item)) {
+        console.log(item);
+        return item;
+    }
+});
