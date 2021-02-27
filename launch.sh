@@ -1,2 +1,2 @@
 cd api
-node main.js
+node --experimental-worker main.js

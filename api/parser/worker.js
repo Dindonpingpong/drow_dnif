@@ -1,3 +1,4 @@
+const { parentPort } = require('worker_threads');
 const fs = require('fs');
 const { performance } = require('perf_hooks');
 const _ = require('lodash');
@@ -43,11 +44,8 @@ const parser = async (word) => {
         'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ']);
     const raw = await getAllSubsets(allChars);
     let knownWords = [];
-    let n = 0;
 
     for (let i = 0; i < raw.length; i++) {
-        let start = performance.now();
-
         const firstListChars = raw[i].sort();
         const secondListChars = _.difference(allChars, firstListChars).sort();
 
@@ -76,9 +74,6 @@ const parser = async (word) => {
             tmp['secondWord'] = res['secondWord'].words;
             result.push(tmp);
         }
-        const used = process.memoryUsage().heapUsed / 1024 / 1024;
-        let end = performance.now();
-        process.stdout.write(`\rVar ${word} ${firstListChars} | ${secondListChars} | ${n++} ${Math.round(used * 100) / 100} MB | ${Math.round(end - start)} ms`);
     }
 
     return result;
@@ -120,19 +115,14 @@ const findWordsByMask = async (firstMask, secondMask, firstListChars, secondList
     } catch (e) {
         console.log(e.message)
         return null;
-    }   
-}
-
-exports.findWords = async (listOfWords) => {
-    try {
-        const result = await Promise.all(listOfWords
-            .filter((word) => (word.length > 6 && word.match(/[A-z0-9]/g) === null))
-            .map((word) => parser(word.toLowerCase())));
-
-        return result;
-    } catch (e) {
-        console.log(e.message);
-        return null;
     }
-
 }
+
+parentPort.once('message', async (word) => {
+    let start = performance.now();
+    const res = await parser(word);
+    let end = performance.now();
+    console.log('It took to parse ' + word + ((end - start) / 60000).toFixed(2) + ' minutes');
+    parentPort.postMessage(res);
+    process.exit();
+});
