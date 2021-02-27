@@ -122,7 +122,7 @@ parentPort.once('message', async (word) => {
     let start = performance.now();
     const res = await parser(word);
     let end = performance.now();
-    console.log('It took to parse ' + word + ((end - start) / 60000).toFixed(2) + ' minutes');
+    console.log(`It took to parse ${word} ${((end - start) / 60000).toFixed(2)} minutes`);
     parentPort.postMessage(res);
     process.exit();
 });

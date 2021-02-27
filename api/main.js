@@ -18,15 +18,18 @@ const csvStringifier = createCsvStringifier({
 const findWords = async (listOfWords) => {
     try {
         listOfWords.forEach(word => {
-            console.log(word);
-            const workerScriptFilePath = require.resolve('./parser/worker.js'); 
+            if (word.length < 6 || word.match(/[A-z0-9]/g) !== null)
+                return;
+
+            console.log(`Thread-parser ${word} has been inited`);
+            const workerScriptFilePath = require.resolve('./parser/worker.js');
             const worker = new Worker(workerScriptFilePath);
 
             worker.on('error', (error) => console.log(error));
 
             worker.on('exit', (code) => {
-              if (code !== 0)
-                throw new Error(`Worker stopped with exit code ${code}`);
+                if (code !== 0)
+                    throw new Error(`Worker stopped with exit code ${code}`);
             });
 
             worker.on('message', (parsedWord) => {
@@ -35,7 +38,7 @@ const findWords = async (listOfWords) => {
                 fs.appendFileSync("./../result.csv", toWin(recordLines));
             });
 
-            worker.postMessage(word);
+            worker.postMessage(word.toLowerCase());
         });
     }
     catch (e) {
